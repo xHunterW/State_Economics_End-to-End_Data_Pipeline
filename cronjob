@@ -1,0 +1,45 @@
+# Use the official Python image as base
+FROM python:3.9-slim
+
+# Set environment variables
+ENV AIRFLOW_HOME=/usr/local/airflow
+ENV JUPYTER_CONFIG_DIR=/root/.jupyter
+
+# Install necessary system packages
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    libssl-dev \
+    libffi-dev \
+    python3-dev \
+    postgresql-client \
+    cron \
+    vim \
+    nano \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install JupyterLab and Airflow
+RUN pip install jupyterlab apache-airflow
+
+# Expose the ports for JupyterLab and Airflow
+EXPOSE 8888 8080
+
+# Set up directories for Airflow and JupyterLab
+RUN mkdir -p $AIRFLOW_HOME $JUPYTER_CONFIG_DIR
+
+# Set up a volume to share files between containers
+VOLUME ["/usr/local/airflow", "/root/.jupyter"]
+
+# Add cron job
+RUN touch /etc/cron.d/cronjob
+RUN echo "* * * * * root echo 'Cron job is running' >> /var/log/cron.log 2>&1" > /etc/cron.d/cronjob
+RUN chmod 0644 /etc/cron.d/cronjob && \
+    crontab /etc/cron.d/cronjob && \
+    touch /var/log/cron.log
+
+# Set the working directory
+WORKDIR /usr/local/airflow
+
+# Start cron, JupyterLab, and Airflow
+CMD service cron start && jupyter lab --ip=0.0.0.0 --no-browser --allow-root

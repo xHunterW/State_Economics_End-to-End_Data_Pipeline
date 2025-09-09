@@ -1,0 +1,48 @@
+version: '3'
+services:
+  
+  postgres:
+    image: postgres:16.3
+    environment:
+      POSTGRES_USER: jhu
+      POSTGRES_PASSWORD: jhu123
+      POSTGRES_DB: jhu
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./shared:/home/jhu
+
+  airflow-jupyter:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    build: .
+    ports:
+      - "8888:8888"
+      - "8080:8080"
+    volumes:
+      - ./shared:/home/jhu
+    depends_on:
+      - postgres
+      # The line below should be "- mongodb"
+      - mongodb
+    environment:
+      - AIRFLOW_HOME=/home/jhu/airflow
+      - AIRFLOW__CORE__DAGS_FOLDER=/home/jhu/airflow/dags
+    command: >
+      bash -c "
+      mkdir -p /home/jhu/airflow/dags &&
+      airflow db init &&
+      airflow users create -r Admin -u admin -p admin -e admin@example.com -f Admin -l User &&
+      service cron start &&
+      jupyter lab --ip=0.0.0.0 --no-browser --allow-root &&
+      chmod 0600 /home/jhu/.local/share/jupyter/runtime/jupyter_cookie_secret"
+
+  mongodb:
+    image: mongo:7.0.10-rc0-jammy
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
