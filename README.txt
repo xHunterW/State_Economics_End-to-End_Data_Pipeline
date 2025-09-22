@@ -10,5 +10,5 @@
 10. To access airflow, open http://localhost:8080 in the browser and use the credentials username: admin and pw: admin.
 11. Run the data_cleaning_and_upload_dag DAG, which extracts, transforms, and loads the data into the PostgreSQL database. This will yield 11 total tables. Make sure that any hidden folders (.ipynb_checkpoints) are deleted. 
 12. Run the generate_pandas_reports DAG to generate HTML profile reports for each table/dataset. The reports will be found in the State_Economics_End-to-End_Data_Pipeline/shared folder. 
-13.Open FinalProject.ipynb and a terminal in jupyterlab. In the terminal, run the following command to start the API: python3 finalprojectapi.py.
+13. Open FinalProject.ipynb and a terminal in jupyterlab. In the terminal, run the following command to start the API: python3 finalprojectapi.py.
 14. You can access the data in the database by entering the desired configuration (limit and table number [0-10]) in FinalProject.ipynb. 
